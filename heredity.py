@@ -139,7 +139,75 @@ def joint_probability(people, one_gene, two_genes, have_trait):
         * everyone in set `have_trait` has the trait, and
         * everyone not in set` have_trait` does not have the trait.
     """
-    raise NotImplementedError
+    probability = 1.0
+    for person in people:
+        # Define the number of genes
+        gene = 0
+        if person in one_gene:
+            gene = 1
+        elif person in two_genes:    
+            gene = 2
+        else:
+            gene = 0   
+
+        # Get the names of the parents
+        mother = people[person]['mother']
+        father = people[person]['father']
+
+        probability_gene = 0.0
+        # Calculates the probability of the gene
+        if not mother and not father: # If the person has no parents
+            probability_gene = PROBS['gene'][gene] # unconditional probability
+
+        else:
+            # Create parents info objects  
+            parents_info = {
+                # For each parent
+                parent: {
+                    # Define the number of genes
+                    'gene': 1 if parent in one_gene else 2 if parent in two_genes else 0, 
+
+                    # Define the probability of the gene to be passed (0.0 for now)
+                    'gene_inheritance': 0.0, 
+                } for parent in [mother, father]
+            }
+            
+            # Calculate the probability of pass the gene from parents
+            for parent in parents_info:
+
+                # Get the number of genes
+                parent_gene = parents_info[parent]['gene']
+
+                # Get the probability of the gene to be passed
+                if parent_gene == 0:
+                    parents_info[parent]['gene_inheritance'] = PROBS['mutation'] # Normal prob
+                elif parent_gene == 1:
+                    # The probability of the gene to be passed is 50% of one parent and other 50% of the other parent
+                    # First 50% with normal probability + 50% with mutation probability 
+                    gene_inheritance_value = 0.5 * PROBS['mutation'] + 0.5 * (1 - PROBS['mutation'])
+                    parents_info[parent]['gene_inheritance'] = gene_inheritance_value
+                else:
+                    # The probability of two genes to be passed is 1 / mutation probability
+                    # 1 are both = 0.5 one parent + 0.5 other parent and all that divided by mutation probability 
+                    parents_info[parent]['gene_inheritance'] = 1 - PROBS['mutation']
+
+            # Calculate probability of gene keeping in mind the inheritance probs
+            if gene == 0:
+                probability_gene = (1 - parents_info[mother]['gene_inheritance']) * \
+                (1 - parents_info[father]['gene_inheritance'])
+            elif gene == 1:
+                probability_gene = ((1 - parents_info[mother]['gene_inheritance']) * parents_info[father]['gene_inheritance'] +
+                                    (1 - parents_info[father]['gene_inheritance']) * parents_info[mother]['gene_inheritance'])
+            else:
+                probability_gene = parents_info[mother]['gene_inheritance'] * parents_info[father]['gene_inheritance']
+            
+            # Calculate trait probability
+            probability_trait = PROBS['trait'][gene][True if person in have_trait else False]
+
+            probability *= probability_gene * probability_trait
+            print(probability)
+            return probability
+
 
 
 def update(probabilities, one_gene, two_genes, have_trait, p):
