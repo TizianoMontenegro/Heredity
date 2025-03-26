@@ -201,12 +201,12 @@ def joint_probability(people, one_gene, two_genes, have_trait):
             else:
                 probability_gene = parents_info[mother]['gene_inheritance'] * parents_info[father]['gene_inheritance']
             
-            # Calculate trait probability
-            probability_trait = PROBS['trait'][gene][True if person in have_trait else False]
+        # Calculate trait probability
+        probability_trait = PROBS['trait'][gene][True if person in have_trait else False]
 
-            probability *= probability_gene * probability_trait
-            print(probability)
-            return probability
+        probability *= probability_gene * probability_trait
+    print(probability)
+    return probability
 
 
 
