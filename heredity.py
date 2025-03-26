@@ -205,7 +205,7 @@ def joint_probability(people, one_gene, two_genes, have_trait):
         probability_trait = PROBS['trait'][gene][True if person in have_trait else False]
 
         probability *= probability_gene * probability_trait
-    print(probability)
+    # print(probability)
     return probability
 
 
@@ -232,7 +232,22 @@ def normalize(probabilities):
     Update `probabilities` such that each probability distribution
     is normalized (i.e., sums to 1, with relative proportions the same).
     """
-    raise NotImplementedError
+    # print(probabilities)
+    for person in probabilities:
+        for probs in ['gene','trait']:
+            # Sum all the values up from gene or trait to get the total value
+            total_values = sum(probabilities[person][probs].values())
+
+            # If total_values doesn't reachs to 0
+            # Or if total_values already reachs to 1
+            if total_values == 0 or total_values == 1:
+                continue
+            
+            # For each prob in gene or trait divided by the total_values
+            # To get the proportional value normalized
+            for key in probabilities[person][probs]:
+                probabilities[person][probs][key] /= total_values
+    # print(probabilities)
 
 
 if __name__ == "__main__":
